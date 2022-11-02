@@ -9,10 +9,12 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const configService: ConfigService = app.get(ConfigService);
+    const port = parseInt(configService.get('PORT'), 10);
+    const wildcard_address = '0.0.0.0';
     app.use(compression());
     app.use(helmet());
     app.useGlobalPipes(new ValidationPipe());
 
-    await app.listen(parseInt(configService.get('PORT'), 10), '0.0.0.0');
+    await app.listen(port, wildcard_address);
 }
 bootstrap();
