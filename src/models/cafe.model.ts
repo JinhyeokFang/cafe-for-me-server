@@ -1,5 +1,6 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
+import GeoJson from './location';
 
 export type CafeDocument = Cafe & Document;
 
@@ -8,11 +9,13 @@ export class Cafe {
     @Prop()
     name: string;
 
-    @Prop()
-    latitude: number;
-
-    @Prop()
-    longitude: number;
+    @Prop({
+        type: {
+            type: String,
+        },
+        coordinates: [Number],
+    })
+    location: GeoJson;
 
     @Prop()
     openHour: number;
