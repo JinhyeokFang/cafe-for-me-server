@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyKeys, Model } from 'mongoose';
 import { Cafe } from 'src/models/cafe.model';
@@ -8,6 +8,7 @@ import DeleteCafeImageDTO from './dtos/delete-cafe-image.dto';
 import DeleteCafeDTO from './dtos/delete-cafe.dto';
 import EditCafeImageDTO from './dtos/edit-cafe-image.dto';
 import EditCafeDTO from './dtos/edit-cafe.dto';
+import GetCafesByAddressDTO from './dtos/get-cafes-by-address.dto';
 import GetCafesByCafeNameDTO from './dtos/get-cafes-by-cafe-name.dto';
 import GetCafesByGeolocationDTO from './dtos/get-cafes-by-geolocation.dto';
 import GetCafesByUserIdDTO from './dtos/get-cafes-by-userid.dto';
@@ -80,6 +81,17 @@ export class CafeService {
                 spherical: true,
             },
         }]);
+        return cafes;
+    }
+
+    public async getCafesByAddress(getCafesByAddressDTO: GetCafesByAddressDTO): Promise<Cafe[]> {
+        const { address } = getCafesByAddressDTO;
+        const cafes: Cafe[] = await this.cafeModel.find({
+            address: {
+                '$regex' : address, 
+                '$options' : 'i',
+            },
+        });
         return cafes;
     }
 

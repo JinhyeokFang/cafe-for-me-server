@@ -104,6 +104,17 @@ export class CafeController {
             cafes,
         };
     }
+    
+    @Get('address/:address')
+    public async getCafesByAddress(@Param('address') address) {
+        const cafes = await this.cafeService.getCafesByAddress({
+            address,
+        });
+        return {
+            success: true,
+            cafes,
+        };
+    }
 
     @UseGuards(JwtGuard)
     @Patch()

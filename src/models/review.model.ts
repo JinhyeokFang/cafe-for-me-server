@@ -6,10 +6,10 @@ export type ReviewDocument = Review & Document;
 @Schema()
 export class Review {
     @Prop()
-    cafeId: ObjectId;
+    cafeId: string;
 
     @Prop()
-    uploaderId: ObjectId;
+    uploaderId: string;
 
     @Prop()
     rate: number;
@@ -18,7 +18,7 @@ export class Review {
     comment: string;
 
     @Prop()
-    images: ObjectId[];
+    images: string[];
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(Review);
