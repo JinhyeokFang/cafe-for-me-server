@@ -18,6 +18,9 @@ export class Cafe {
     location: GeoJson;
 
     @Prop()
+    address: string;
+
+    @Prop()
     openHour: number;
 
     @Prop()
@@ -40,6 +43,7 @@ export class Cafe {
 }
 
 export const CafeSchema = SchemaFactory.createForClass(Cafe);
+CafeSchema.index({ location: '2dsphere' });
 
 export const CafeModel: ModelDefinition = {
     name: Cafe.name,

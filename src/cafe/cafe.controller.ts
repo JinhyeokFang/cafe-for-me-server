@@ -1,5 +1,4 @@
-import { Body, Controller, Delete, Get, Logger, Param, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { debug } from 'console';
+import { Body, Controller, Delete, Get, Logger, Param, ParseFloatPipe, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import CreateCafeRequestBody from 'src/cafe/dtos/create-cafe-request.body';
@@ -8,6 +7,7 @@ import ImageInterceptor from 'src/image/image.interceptor';
 import { ImageService } from 'src/image/image.service';
 import Token from 'src/interfaces/token';
 import { CafeService } from './cafe.service';
+import EditCafeImageRequestBody from './dtos/edit-cafe-image-request.body';
 import EditCafeRequestBody from './dtos/edit-cafe-request.body';
 
 @Controller('cafe')
@@ -28,6 +28,7 @@ export class CafeController {
         const {
             name,
             latitude, longitude,
+            address,
             openHour, openMinute,
             closeHour, closeMinute,
             closeDay,
@@ -35,7 +36,7 @@ export class CafeController {
         const { userId } = req.user as Token;
         const imagesInfo: UploadImageInfoDTO[] = [];
 
-        for (let image of images) {
+        for (const image of images) {
             imagesInfo.push({
                 imagename: image.filename,
                 userId,
@@ -49,12 +50,17 @@ export class CafeController {
         await this.cafeService.createCafe({
             name,
             latitude, longitude,
+            address,
             openHour, openMinute,
             closeHour, closeMinute,
             closeDay,
             images: imageUrls,
             uploaderId: userId,
         });
+
+        return {
+            success: true,
+        }
     }
     
     @Get(':name')
@@ -78,7 +84,25 @@ export class CafeController {
         return {
             success: true,
             cafes,
-        }
+        };
+    }
+
+    @UseGuards(JwtGuard)
+    @Get('/location/:latitude/:longitude')
+    public async getCafesByGeolocation(
+        @Param('latitude', ParseFloatPipe) latitude, 
+        @Param('longitude', ParseFloatPipe) longitude, 
+        @Query('maxDistance', ParseFloatPipe) maxDistance
+    ) {
+        const cafes = await this.cafeService.getCafesByGeolocation({
+            latitude,
+            longitude,
+            maxDistance,
+        });
+        return {
+            success: true,
+            cafes,
+        };
     }
 
     @UseGuards(JwtGuard)
@@ -99,6 +123,23 @@ export class CafeController {
             openHour, openMinute,
             closeHour, closeMinute, closeDay,
         });
+        return {
+            success: true,
+        };
+    }
+
+    @UseGuards(JwtGuard)
+    @Patch('image')
+    public async editCafeImage(@Body() body: EditCafeImageRequestBody) {
+        const { id, imageIndex, imageURL } = body;
+        await this.cafeService.editCafeImage({
+            id,
+            imageIndex,
+            imageURL,
+        });
+        return {
+            success: true,
+        };
     }
 
     @UseGuards(JwtGuard)
@@ -107,5 +148,20 @@ export class CafeController {
         await this.cafeService.deleteCafe({
             id,
         });
+        return {
+            success: true,
+        };
+    }
+
+    @UseGuards(JwtGuard)
+    @Delete(':id/image/:imageIndex')
+    public async deleteCafeImage(@Param('id') id, @Param('imageIndex') imageIndex) {
+        await this.cafeService.deleteCafeImage({
+            id,
+            imageIndex,
+        });
+        return {
+            success: true,
+        };
     }
 }

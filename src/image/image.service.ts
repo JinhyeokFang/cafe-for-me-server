@@ -29,7 +29,7 @@ export class ImageService {
     public async uploadMultipleImagesInfo(uploadMultipleImagesInfo: UploadMultipleImagesInfo): Promise<string[]> {
         const { images } = uploadMultipleImagesInfo;
         const imageUrls: string[] = [];
-        for (let image of images) {
+        for (const image of images) {
             const imageUrl = await this.uploadImageInfo(image);
             imageUrls.push(imageUrl);
         }

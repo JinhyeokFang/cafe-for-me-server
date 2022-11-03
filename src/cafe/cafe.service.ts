@@ -1,12 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { AnyKeys, Model } from 'mongoose';
 import { Cafe } from 'src/models/cafe.model';
 import GeoJson from 'src/models/location';
 import CreateCafeDTO from './dtos/create-cafe.dto';
+import DeleteCafeImageDTO from './dtos/delete-cafe-image.dto';
 import DeleteCafeDTO from './dtos/delete-cafe.dto';
+import EditCafeImageDTO from './dtos/edit-cafe-image.dto';
 import EditCafeDTO from './dtos/edit-cafe.dto';
 import GetCafesByCafeNameDTO from './dtos/get-cafes-by-cafe-name.dto';
+import GetCafesByGeolocationDTO from './dtos/get-cafes-by-geolocation.dto';
 import GetCafesByUserIdDTO from './dtos/get-cafes-by-userid.dto';
 
 @Injectable()
@@ -19,6 +22,7 @@ export class CafeService {
         const {
             name,
             latitude, longitude,
+            address,
             openHour, openMinute,
             closeHour, closeMinute, closeDay,
             images,
@@ -27,26 +31,19 @@ export class CafeService {
 
         const location: GeoJson = {
             type: 'Point',
-            coordinates: [parseInt(latitude.toString(), 10), parseInt(longitude.toString(), 10)],
+            coordinates: [longitude, latitude],
         };
 
         const cafeInstance = await this.cafeModel.create({
             name,
             location,
+            address,
             openHour, openMinute,
             closeHour, closeMinute, closeDay,
             images,
             uploaderId,
         });
 
-        Logger.debug({
-            name,
-            location,
-            openHour, openMinute,
-            closeHour, closeMinute, closeDay,
-            images,
-            uploaderId,
-        })
         await cafeInstance.save();
     }
 
@@ -66,6 +63,23 @@ export class CafeService {
         const cafes: Cafe[] = await this.cafeModel.find({
             uploaderId: userId,
         });
+        return cafes;
+    }
+
+    public async getCafesByGeolocation(getCafesByGeolocationDTO: GetCafesByGeolocationDTO): Promise<Cafe[]> {
+        const { latitude, longitude, maxDistance } = getCafesByGeolocationDTO;
+        const coordinates: [number, number] = [latitude, longitude];
+        const cafes: Cafe[] = await this.cafeModel.aggregate([{
+            $geoNear: {
+                near: { 
+                    type: "Point", 
+                    coordinates,
+                },
+                distanceField: "distance",
+                maxDistance,
+                spherical: true,
+            },
+        }]);
         return cafes;
     }
 
@@ -95,7 +109,17 @@ export class CafeService {
         })
     }
 
-    // public async editCafeImage();
+    public async editCafeImage(editCafeImageDTO: EditCafeImageDTO) {
+        const { id, imageIndex, imageURL } = editCafeImageDTO;
+        const setQuery: AnyKeys<Cafe> = {};
+        setQuery[`images.${imageIndex}`] = imageURL;
+
+        await this.cafeModel.updateOne({
+            _id: id,
+        }, {
+            $set: setQuery,
+        })
+    }
     
     public async deleteCafe(deleteCafeDTO: DeleteCafeDTO) {
         const { id } = deleteCafeDTO;
@@ -104,5 +128,21 @@ export class CafeService {
         });
     }
     
-    // public async deleteCafeImage();
+    public async deleteCafeImage(deleteCafeImageDTO: DeleteCafeImageDTO) {
+        const { id, imageIndex } = deleteCafeImageDTO;
+        const setQuery: AnyKeys<Cafe> = {};
+        setQuery[`images.${imageIndex}`] = null;
+        await this.cafeModel.updateOne({
+            _id: id,
+        }, {
+            $unset: setQuery,
+        });
+        await this.cafeModel.updateOne({
+            _id: id,
+        }, {
+            $pull: {
+                images: null,
+            },
+        });
+    }
 }

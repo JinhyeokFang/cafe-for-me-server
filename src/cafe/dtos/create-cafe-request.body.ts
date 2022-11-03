@@ -24,5 +24,8 @@ export default class CreateCafeRequestBody {
     closeMinute: number;
 
     @IsString()
+    address: string;
+
+    @IsString()
     closeDay: string;
 }
