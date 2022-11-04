@@ -1,20 +1,14 @@
-import { Module } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { ReviewController } from './review.controller';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ReviewModel } from 'src/models/review.model';
-import getImageUploadModule from 'src/image/image-upload.module';
 import { ImageModule } from 'src/image/image.module';
+import ModuleWithModel from 'src/base/mongoose-module';
+import imageUploadModule from 'src/image/image-upload.module';
 
-@Module({
-    imports: [
-        getImageUploadModule(),
-        MongooseModule.forFeature([
-            ReviewModel,
-        ]),
-        ImageModule,
-    ],
-    providers: [ReviewService],
-    controllers: [ReviewController],
+@ModuleWithModel({
+  imports: [imageUploadModule, ImageModule],
+  providers: [ReviewService],
+  controllers: [ReviewController],
+  models: [ReviewModel],
 })
 export class ReviewModule {}

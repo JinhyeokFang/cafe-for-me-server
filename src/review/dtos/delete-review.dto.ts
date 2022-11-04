@@ -1,3 +1,3 @@
 export default interface DeleteReviewDTO {
-    id: string;
+  id: string;
 }

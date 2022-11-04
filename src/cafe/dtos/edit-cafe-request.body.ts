@@ -1,22 +1,22 @@
-import { IsNumber, IsNumberString, IsString, Max, Min, MinLength } from "class-validator";
+import { IsString } from 'class-validator';
 
 export default class EditCafeRequestBody {
-    @IsString()
-    id: string;
+  @IsString()
+  id: string;
 
-    name?: string;
+  name?: string;
 
-    latitude?: number;
+  latitude?: number;
 
-    longitude?: number;
+  longitude?: number;
 
-    openHour?: number;
+  openHour?: number;
 
-    openMinute?: number;
+  openMinute?: number;
 
-    closeHour?: number;
+  closeHour?: number;
 
-    closeMinute?: number;
+  closeMinute?: number;
 
-    closeDay?: string;
+  closeDay?: string;
 }

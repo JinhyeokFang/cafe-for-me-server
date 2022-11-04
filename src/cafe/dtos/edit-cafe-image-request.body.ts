@@ -1,11 +1,11 @@
-import { IsString } from "class-validator";
+import { IsString } from 'class-validator';
 
 export default class EditCafeImageRequestBody {
-    @IsString()
-    id: string;
+  @IsString()
+  id: string;
 
-    imageIndex: number;
+  imageIndex: number;
 
-    @IsString()
-    imageURL: string;
+  @IsString()
+  imageURL: string;
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AnyKeys, Model } from 'mongoose';
+import { Model } from 'mongoose';
+import ServiceError from 'src/base/service-error';
 import { Cafe } from 'src/models/cafe.model';
 import GeoJson from 'src/models/location';
 import CreateCafeDTO from './dtos/create-cafe.dto';
@@ -13,148 +14,241 @@ import GetCafesByCafeNameDTO from './dtos/get-cafes-by-cafe-name.dto';
 import GetCafesByGeolocationDTO from './dtos/get-cafes-by-geolocation.dto';
 import GetCafesByUserIdDTO from './dtos/get-cafes-by-userid.dto';
 
+export enum CafeServiceErrorCode {
+  CafeNotFound,
+  ImageNotFound,
+}
+
 @Injectable()
 export class CafeService {
-    constructor(
-        @InjectModel(Cafe.name) private cafeModel: Model<Cafe>,
-    ) {}
+  constructor(@InjectModel(Cafe.name) private cafeModel: Model<Cafe>) {}
 
-    public async createCafe(createCafeDTO: CreateCafeDTO): Promise<void> {
-        const {
-            name,
-            latitude, longitude,
-            address,
-            openHour, openMinute,
-            closeHour, closeMinute, closeDay,
-            images,
-            uploaderId,
-        } = createCafeDTO;
+  public async createCafe(createCafeDTO: CreateCafeDTO): Promise<void> {
+    const {
+      name,
+      latitude,
+      longitude,
+      address,
+      openHour,
+      openMinute,
+      closeHour,
+      closeMinute,
+      closeDay,
+      images,
+      uploaderId,
+    } = createCafeDTO;
 
-        const location: GeoJson = {
+    const location: GeoJson = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    };
+
+    const cafeInstance = await this.cafeModel.create({
+      name,
+      location,
+      address,
+      openHour,
+      openMinute,
+      closeHour,
+      closeMinute,
+      closeDay,
+      images,
+      uploaderId,
+    });
+
+    await cafeInstance.save();
+  }
+
+  public async getCafesByCafeName(
+    getCafesByCafeNameDTO: GetCafesByCafeNameDTO,
+  ): Promise<Cafe[]> {
+    const { name } = getCafesByCafeNameDTO;
+    const cafes: Cafe[] = await this.cafeModel.find({
+      name: {
+        $regex: name,
+        $options: 'i',
+      },
+    });
+    return cafes;
+  }
+
+  public async getCafesByUserId(
+    getCafesByUserIdDTO: GetCafesByUserIdDTO,
+  ): Promise<Cafe[]> {
+    const { userId } = getCafesByUserIdDTO;
+    const cafes: Cafe[] = await this.cafeModel.find({
+      uploaderId: userId,
+    });
+    return cafes;
+  }
+
+  public async getCafesByGeolocation(
+    getCafesByGeolocationDTO: GetCafesByGeolocationDTO,
+  ): Promise<Cafe[]> {
+    const { latitude, longitude, maxDistance } = getCafesByGeolocationDTO;
+    const coordinates: [number, number] = [latitude, longitude];
+    const cafes: Cafe[] = await this.cafeModel.aggregate([
+      {
+        $geoNear: {
+          near: {
             type: 'Point',
-            coordinates: [longitude, latitude],
-        };
+            coordinates,
+          },
+          distanceField: 'distance',
+          maxDistance,
+          spherical: true,
+        },
+      },
+    ]);
+    return cafes;
+  }
 
-        const cafeInstance = await this.cafeModel.create({
-            name,
-            location,
-            address,
-            openHour, openMinute,
-            closeHour, closeMinute, closeDay,
-            images,
-            uploaderId,
-        });
+  public async getCafesByAddress(
+    getCafesByAddressDTO: GetCafesByAddressDTO,
+  ): Promise<Cafe[]> {
+    const { address } = getCafesByAddressDTO;
+    const cafes: Cafe[] = await this.cafeModel.find({
+      address: {
+        $regex: address,
+        $options: 'i',
+      },
+    });
+    return cafes;
+  }
 
-        await cafeInstance.save();
-    }
+  public async editCafe(editCafeDTO: EditCafeDTO) {
+    const {
+      id,
+      name,
+      latitude,
+      longitude,
+      openHour,
+      openMinute,
+      closeHour,
+      closeMinute,
+      closeDay,
+    } = editCafeDTO;
 
-    public async getCafesByCafeName(getCafesByCafeNameDTO: GetCafesByCafeNameDTO): Promise<Cafe[]> {
-        const { name } = getCafesByCafeNameDTO;
-        const cafes: Cafe[] = await this.cafeModel.find({
-            name: {
-                '$regex' : name, 
-                '$options' : 'i',
-            },
-        });
-        return cafes;
-    }
+    const location = {
+      type: 'Point',
+      coordinates: [latitude, longitude],
+    };
 
-    public async getCafesByUserId(getCafesByUserIdDTO: GetCafesByUserIdDTO): Promise<Cafe[]> {
-        const { userId } = getCafesByUserIdDTO;
-        const cafes: Cafe[] = await this.cafeModel.find({
-            uploaderId: userId,
-        });
-        return cafes;
-    }
+    const isExist = await this.isCafeExist(id);
+    if (!isExist)
+      throw new ServiceError(
+        CafeServiceErrorCode.CafeNotFound,
+        `the cafe identified by ${id} does not exist`,
+      );
 
-    public async getCafesByGeolocation(getCafesByGeolocationDTO: GetCafesByGeolocationDTO): Promise<Cafe[]> {
-        const { latitude, longitude, maxDistance } = getCafesByGeolocationDTO;
-        const coordinates: [number, number] = [latitude, longitude];
-        const cafes: Cafe[] = await this.cafeModel.aggregate([{
-            $geoNear: {
-                near: { 
-                    type: "Point", 
-                    coordinates,
-                },
-                distanceField: "distance",
-                maxDistance,
-                spherical: true,
-            },
-        }]);
-        return cafes;
-    }
+    await this.cafeModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: {
+          name,
+          openHour,
+          openMinute,
+          closeHour,
+          closeMinute,
+          closeDay,
+          location: latitude && longitude ? location : undefined,
+        },
+      },
+    );
+  }
 
-    public async getCafesByAddress(getCafesByAddressDTO: GetCafesByAddressDTO): Promise<Cafe[]> {
-        const { address } = getCafesByAddressDTO;
-        const cafes: Cafe[] = await this.cafeModel.find({
-            address: {
-                '$regex' : address, 
-                '$options' : 'i',
-            },
-        });
-        return cafes;
-    }
+  private async isCafeExist(id: string) {
+    const cafe = await this.cafeModel.findOne({
+      _id: id,
+    });
+    return cafe !== null;
+  }
 
-    public async editCafe(editCafeDTO: EditCafeDTO) {
-        const {
-            id,
-            name,
-            latitude, longitude,
-            openHour, openMinute,
-            closeHour, closeMinute, closeDay,
-        } = editCafeDTO;
+  public async editCafeImage(editCafeImageDTO: EditCafeImageDTO) {
+    const { id, imageIndex, imageURL } = editCafeImageDTO;
 
-        const location = {
-            type: 'Point',
-            coordinates: [latitude, longitude],
-        };
+    const isExist = await this.isCafeImageExist(id, imageIndex);
+    if (!isExist)
+      throw new ServiceError(
+        CafeServiceErrorCode.ImageNotFound,
+        `the image does not exist`,
+      );
 
-        await this.cafeModel.updateOne({
-            _id: id,
-        }, {
-            $set: {
-                name,
-                openHour, openMinute,
-                closeHour, closeMinute, closeDay,
-                location: latitude && longitude ? location : undefined,
-            }
-        })
-    }
+    const setQuery: Record<string, unknown> = {};
+    setQuery[`images.${imageIndex}`] = imageURL;
 
-    public async editCafeImage(editCafeImageDTO: EditCafeImageDTO) {
-        const { id, imageIndex, imageURL } = editCafeImageDTO;
-        const setQuery: AnyKeys<Cafe> = {};
-        setQuery[`images.${imageIndex}`] = imageURL;
+    await this.cafeModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $set: setQuery,
+      },
+    );
+  }
 
-        await this.cafeModel.updateOne({
-            _id: id,
-        }, {
-            $set: setQuery,
-        })
-    }
-    
-    public async deleteCafe(deleteCafeDTO: DeleteCafeDTO) {
-        const { id } = deleteCafeDTO;
-        await this.cafeModel.deleteOne({
-            _id: id,
-        });
-    }
-    
-    public async deleteCafeImage(deleteCafeImageDTO: DeleteCafeImageDTO) {
-        const { id, imageIndex } = deleteCafeImageDTO;
-        const setQuery: AnyKeys<Cafe> = {};
-        setQuery[`images.${imageIndex}`] = null;
-        await this.cafeModel.updateOne({
-            _id: id,
-        }, {
-            $unset: setQuery,
-        });
-        await this.cafeModel.updateOne({
-            _id: id,
-        }, {
-            $pull: {
-                images: null,
-            },
-        });
-    }
+  private async isCafeImageExist(
+    id: string,
+    imageIndex: number,
+  ): Promise<boolean> {
+    if (!this.isCafeExist(id))
+      throw new ServiceError(
+        CafeServiceErrorCode.CafeNotFound,
+        `the cafe identified by ${id} does not exist`,
+      );
+    const cafe = await this.cafeModel.findOne({
+      id,
+    });
+    const isImageExist = cafe.images.length < imageIndex;
+    return isImageExist;
+  }
+
+  public async deleteCafe(deleteCafeDTO: DeleteCafeDTO) {
+    const { id } = deleteCafeDTO;
+
+    const isExist = await this.isCafeExist(id);
+    if (!isExist)
+      throw new ServiceError(
+        CafeServiceErrorCode.CafeNotFound,
+        `the cafe identified by ${id} does not exist`,
+      );
+
+    await this.cafeModel.deleteOne({
+      _id: id,
+    });
+  }
+
+  public async deleteCafeImage(deleteCafeImageDTO: DeleteCafeImageDTO) {
+    const { id, imageIndex } = deleteCafeImageDTO;
+
+    const isExist = await this.isCafeImageExist(id, imageIndex);
+    if (!isExist)
+      throw new ServiceError(
+        CafeServiceErrorCode.ImageNotFound,
+        `the image does not exist`,
+      );
+
+    const setQuery: Record<string, unknown> = {};
+    setQuery[`images.${imageIndex}`] = null;
+    await this.cafeModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $unset: setQuery,
+      },
+    );
+    await this.cafeModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        $pull: {
+          images: null,
+        },
+      },
+    );
+  }
 }

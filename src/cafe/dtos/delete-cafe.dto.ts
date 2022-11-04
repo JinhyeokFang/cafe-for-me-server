@@ -1,3 +1,3 @@
 export default interface DeleteCafeDTO {
-    id: string
+  id: string;
 }

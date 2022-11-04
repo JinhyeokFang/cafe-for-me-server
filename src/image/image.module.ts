@@ -1,17 +1,12 @@
-import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import ModuleWithModel from 'src/base/mongoose-module';
 import { ImageModel } from 'src/models/image.model';
 import { ImageService } from './image.service';
 
-@Module({
-  imports: [
-    ConfigModule,
-    MongooseModule.forFeature([
-      ImageModel
-    ]),
-  ],
+@ModuleWithModel({
+  imports: [ConfigModule],
   providers: [ImageService],
   exports: [ImageService],
+  models: [ImageModel],
 })
 export class ImageModule {}

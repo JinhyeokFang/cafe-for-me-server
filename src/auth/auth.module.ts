@@ -5,17 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModel } from 'src/models/user.model';
-import getJwtModule from './jwt-verification.module';
+import jwtModule from './jwt-verification.module';
 
 @Module({
-    imports: [
-        ConfigModule,
-        MongooseModule.forFeature([
-            UserModel
-        ]),
-        getJwtModule(),
-    ],
-    providers: [AuthService, JwtStrategy],
-    controllers: [AuthController],
+  imports: [ConfigModule, MongooseModule.forFeature([UserModel]), jwtModule],
+  providers: [AuthService, JwtStrategy],
+  controllers: [AuthController],
 })
 export class AuthModule {}

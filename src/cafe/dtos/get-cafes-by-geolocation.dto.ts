@@ -1,5 +1,5 @@
 export default interface GetCafesByGeolocationDTO {
-    latitude: number;
-    longitude: number;
-    maxDistance: number;
+  latitude: number;
+  longitude: number;
+  maxDistance: number;
 }

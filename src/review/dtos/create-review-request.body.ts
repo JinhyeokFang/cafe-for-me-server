@@ -1,12 +1,12 @@
-import { IsNumberString, IsString } from "class-validator";
+import { IsNumberString, IsString } from 'class-validator';
 
 export default class CreateReviewRequestBody {
-    @IsString()
-    cafeId: string;
+  @IsString()
+  cafeId: string;
 
-    @IsNumberString()
-    rate: number;
+  @IsNumberString()
+  rate: number;
 
-    @IsString()
-    comment: string;
+  @IsString()
+  comment: string;
 }

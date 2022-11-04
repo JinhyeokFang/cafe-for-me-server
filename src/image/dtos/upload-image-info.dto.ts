@@ -1,4 +1,4 @@
 export default interface UploadImageInfoDTO {
-    imagename: string;
-    userId: string;
+  imagename: string;
+  userId: string;
 }

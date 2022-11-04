@@ -1,3 +1,3 @@
 export default interface Token {
-    userId: string;
+  userId: string;
 }

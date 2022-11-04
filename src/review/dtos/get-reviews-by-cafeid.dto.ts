@@ -1,3 +1,3 @@
 export default interface GetReviewsByCafeIdDTO {
-    cafeId: string;
+  cafeId: string;
 }

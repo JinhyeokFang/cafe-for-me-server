@@ -6,46 +6,46 @@ export type CafeDocument = Cafe & Document;
 
 @Schema()
 export class Cafe {
-    @Prop()
-    name: string;
+  @Prop()
+  name: string;
 
-    @Prop({
-        type: {
-            type: String,
-        },
-        coordinates: [Number],
-    })
-    location: GeoJson;
+  @Prop({
+    type: {
+      type: String,
+    },
+    coordinates: [Number],
+  })
+  location: GeoJson;
 
-    @Prop()
-    address: string;
+  @Prop()
+  address: string;
 
-    @Prop()
-    openHour: number;
+  @Prop()
+  openHour: number;
 
-    @Prop()
-    openMinute: number;
+  @Prop()
+  openMinute: number;
 
-    @Prop()
-    closeHour: number;
+  @Prop()
+  closeHour: number;
 
-    @Prop()
-    closeMinute: number;
+  @Prop()
+  closeMinute: number;
 
-    @Prop()
-    closeDay: string;
+  @Prop()
+  closeDay: string;
 
-    @Prop()
-    images: string[];
+  @Prop()
+  images: string[];
 
-    @Prop()
-    uploaderId: string;
+  @Prop()
+  uploaderId: string;
 }
 
 export const CafeSchema = SchemaFactory.createForClass(Cafe);
 CafeSchema.index({ location: '2dsphere' });
 
 export const CafeModel: ModelDefinition = {
-    name: Cafe.name,
-    schema: CafeSchema
-}
+  name: Cafe.name,
+  schema: CafeSchema,
+};

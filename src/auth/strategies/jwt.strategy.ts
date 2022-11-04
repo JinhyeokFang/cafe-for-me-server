@@ -6,15 +6,15 @@ import Token from 'src/interfaces/token';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(private configService: ConfigService) {
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
-            ignoreExpiration: false,
-            secretOrKey: configService.get('JWT_SECRET'),
-        });
-    }
+  constructor(private configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
+      ignoreExpiration: false,
+      secretOrKey: configService.get('JWT_SECRET'),
+    });
+  }
 
-    async validate(payload: Token) {
-        return payload;
-    }
+  async validate(payload: Token) {
+    return payload;
+  }
 }

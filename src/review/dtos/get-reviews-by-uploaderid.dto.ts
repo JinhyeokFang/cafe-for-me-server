@@ -1,3 +1,3 @@
 export default interface GetReviewsByUploaderIdDTO {
-    uploaderId: string;
+  uploaderId: string;
 }

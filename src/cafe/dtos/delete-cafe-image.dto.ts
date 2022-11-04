@@ -1,4 +1,4 @@
 export default interface DeleteCafeImageDTO {
-    id: string,
-    imageIndex: string,
+  id: string;
+  imageIndex: number;
 }
