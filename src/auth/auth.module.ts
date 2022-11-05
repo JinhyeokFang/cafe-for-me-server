@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModel } from 'src/models/user.model';
-import jwtModule from './jwt-verification.module';
+import jwtModule from './jwt.module';
 
 @Module({
   imports: [ConfigModule, MongooseModule.forFeature([UserModel]), jwtModule],
