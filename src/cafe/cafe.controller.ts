@@ -1,8 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  HttpException,
+  Logger,
   Param,
   ParseFloatPipe,
   ParseIntPipe,
@@ -19,6 +22,7 @@ import CreateCafeRequestBody from 'src/cafe/dtos/create-cafe-request.body';
 import UploadImageInfoDTO from 'src/image/dtos/upload-image-info.dto';
 import ImageInterceptor from 'src/image/image.interceptor';
 import { ImageService } from 'src/image/image.service';
+import { LocationService } from 'src/location/location.service';
 import { CafeService } from './cafe.service';
 import EditCafeImageRequestBody from './dtos/edit-cafe-image-request.body';
 import EditCafeRequestBody from './dtos/edit-cafe-request.body';
@@ -28,6 +32,7 @@ export class CafeController {
   constructor(
     private readonly cafeService: CafeService,
     private readonly imageService: ImageService,
+    private readonly locationService: LocationService,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -40,16 +45,38 @@ export class CafeController {
   ) {
     const {
       name,
-      latitude,
-      longitude,
-      address,
       openHour,
       openMinute,
       closeHour,
       closeMinute,
       closeDay,
     } = createCafeRequestBody;
+    let {
+      latitude,
+      longitude,
+      address,
+    } = createCafeRequestBody;
     const imagesInfo: UploadImageInfoDTO[] = [];
+
+    if (!(latitude && longitude) && !address)
+      throw new BadRequestException({
+        message: `must request with the coordinate data or the address`,
+      });
+
+    if (!address) {
+      address = await this.locationService.coordinatesToAddress(latitude, longitude)
+      address = address ? address : '';
+    }
+
+    if (!(latitude && longitude)) {
+      const coordinates = await this.locationService.addressToCoordinates(address);
+      if (coordinates === null)
+        throw new BadRequestException({
+          message: `given address is wrong`,
+        });
+      latitude = coordinates.latitude;
+      longitude = coordinates.longitude;
+    }
 
     for (const image of images) {
       imagesInfo.push({

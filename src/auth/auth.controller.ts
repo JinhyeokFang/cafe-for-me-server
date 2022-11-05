@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, Logger, Post } from '@nestjs/common';
+import { Body, ConflictException, Controller, HttpException, InternalServerErrorException, Logger, NotFoundException, Post } from '@nestjs/common';
 import ServiceError from 'src/base/service-error';
 import { AuthService, AuthServiceErrorCode } from './auth.service';
 import LoginRequestBody from './dtos/login-request.body';
@@ -25,20 +25,18 @@ export class AuthController {
         err instanceof ServiceError &&
         err.code == AuthServiceErrorCode.UserNotFound
       )
-        throw new HttpException(
+        throw new NotFoundException(
           {
             success: false,
             message: err.message,
           },
-          404,
         );
       Logger.error(err);
-      throw new HttpException(
+      throw new InternalServerErrorException(
         {
           success: false,
           message: 'Internal Server Error',
         },
-        500,
       );
     }
   }
@@ -60,20 +58,18 @@ export class AuthController {
         err instanceof ServiceError &&
         err.code == AuthServiceErrorCode.UserAlreadyExist
       )
-        throw new HttpException(
+        throw new ConflictException(
           {
             success: false,
             message: err.message,
           },
-          409,
         );
       Logger.error(err);
-      throw new HttpException(
+      throw new InternalServerErrorException(
         {
-          succest: false,
+          success: false,
           message: 'Internal Server Error',
         },
-        500,
       );
     }
   }

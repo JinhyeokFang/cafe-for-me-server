@@ -1,4 +1,4 @@
-import { IsNumberString, IsString, MinLength } from 'class-validator';
+import { IsNumberString, IsOptional, IsString, MinLength } from 'class-validator';
 
 export default class CreateCafeRequestBody {
   @IsString()
@@ -6,10 +6,16 @@ export default class CreateCafeRequestBody {
   name: string;
 
   @IsNumberString()
-  latitude: number;
+  @IsOptional()
+  latitude?: number;
 
   @IsNumberString()
-  longitude: number;
+  @IsOptional()
+  longitude?: number;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 
   @IsNumberString()
   openHour: number;
@@ -22,9 +28,6 @@ export default class CreateCafeRequestBody {
 
   @IsNumberString()
   closeMinute: number;
-
-  @IsString()
-  address: string;
 
   @IsString()
   closeDay: string;
