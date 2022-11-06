@@ -12,7 +12,7 @@ async function bootstrap() {
   const configService: ConfigService = app.get(ConfigService);
   const port = parseInt(configService.get('PORT'), 10);
   const hostname = configService.get('HOSTNAME');
-  app.enableCors();
+  app.setGlobalPrefix('api');
   app.use(compression());
   app.use(helmet());
   app.useGlobalPipes(new ValidationPipe());

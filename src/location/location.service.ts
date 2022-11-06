@@ -40,6 +40,30 @@ export class LocationService {
         return locationData.address.address_name;
     }
 
+    public async searchLocationData(keyword: string) {
+        const url = '/v2/local/search/keyword.json';
+        const parameters = {
+            query: keyword,
+            category_group_code: 'CE7'
+        };
+        const responseData = await this.request(url, parameters);
+        const locationData = responseData.documents;
+        const isLocationExist = locationData !== undefined;
+        if (!isLocationExist)
+            return null;
+
+        const locations = [];
+        for (const location of locationData) {
+            locations.push({
+                name: location.place_name,
+                address: location.road_address_name,
+                latitude: location.y,
+                longitude: location.x,
+            });
+        }
+        return locations;
+    }
+
     private async request(url: string, parameters: Record<string, unknown>, requestErrorMessage?: string) {
         const requestConfig = {
             params: parameters,
