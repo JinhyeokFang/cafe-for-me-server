@@ -9,6 +9,7 @@ import DeleteCafeImageDTO from './dtos/delete-cafe-image.dto';
 import DeleteCafeDTO from './dtos/delete-cafe.dto';
 import EditCafeImageDTO from './dtos/edit-cafe-image.dto';
 import EditCafeDTO from './dtos/edit-cafe.dto';
+import { GetCafeByCafeIdDTO } from './dtos/get-cafe-by-cafeid.dto';
 import GetCafesByAddressDTO from './dtos/get-cafes-by-address.dto';
 import GetCafesByCafeNameDTO from './dtos/get-cafes-by-cafe-name.dto';
 import GetCafesByGeolocationDTO from './dtos/get-cafes-by-geolocation.dto';
@@ -114,6 +115,16 @@ export class CafeService {
       },
     });
     return cafes;
+  }
+
+  public async getCafeByCafeId(
+    getCafeByCafeIdDTO: GetCafeByCafeIdDTO,
+  ): Promise<Cafe> {
+    const { cafeId } = getCafeByCafeIdDTO;
+    const cafe: Cafe = await this.cafeModel.findOne({
+      _id: cafeId,
+    });
+    return cafe;
   }
 
   public async editCafe(editCafeDTO: EditCafeDTO) {

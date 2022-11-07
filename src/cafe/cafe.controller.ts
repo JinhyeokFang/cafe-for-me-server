@@ -160,6 +160,17 @@ export class CafeController {
     };
   }
 
+  @Get('id/:id')
+  public async getCafeByCafeId(@Param('id') cafeId: string) {
+    const cafe = await this.cafeService.getCafeByCafeId({
+      cafeId,
+    });
+    return {
+      success: true,
+      cafe,
+    };
+  }
+
   @UseGuards(JwtGuard)
   @Patch()
   public async editCafe(@Body() body: EditCafeRequestBody) {
