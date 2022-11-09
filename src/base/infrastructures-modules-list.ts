@@ -21,7 +21,8 @@ const infrastructureModulesList: DynamicModule[] = [
     inject: [ConfigService],
   }),
   ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'images'),
+    rootPath: join(__dirname, '../..', 'images'),
+    serveRoot: '/api/static'
   }),
 ];
 

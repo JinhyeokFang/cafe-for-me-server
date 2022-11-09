@@ -108,30 +108,6 @@ export class CafeController {
     };
   }
 
-  @Get(':name')
-  public async getCafesByCafeName(@Param('name') name: string) {
-    const cafes = await this.cafeService.getCafesByCafeName({
-      name,
-    });
-    return {
-      success: true,
-      cafes,
-    };
-  }
-
-  @UseGuards(JwtGuard)
-  @Get('')
-  public async getCafesByUserId(@UserId() userId: string) {
-    const cafes = await this.cafeService.getCafesByUserId({
-      userId,
-    });
-    return {
-      success: true,
-      cafes,
-    };
-  }
-
-  @UseGuards(JwtGuard)
   @Get('/location/:latitude/:longitude')
   public async getCafesByGeolocation(
     @Param('latitude', ParseFloatPipe) latitude: number,
@@ -168,6 +144,29 @@ export class CafeController {
     return {
       success: true,
       cafe,
+    };
+  }
+
+  @Get(':name')
+  public async getCafesByCafeName(@Param('name') name: string) {
+    const cafes = await this.cafeService.getCafesByCafeName({
+      name,
+    });
+    return {
+      success: true,
+      cafes,
+    };
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('')
+  public async getCafesByUserId(@UserId() userId: string) {
+    const cafes = await this.cafeService.getCafesByUserId({
+      userId,
+    });
+    return {
+      success: true,
+      cafes,
     };
   }
 

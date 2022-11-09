@@ -19,7 +19,7 @@ export class ImageService {
   ): Promise<string> {
     const { imagename, userId } = uploadImageInfoDTO;
     const rootUrl = this.configService.get<string>('URL');
-    const imageUrl = join(rootUrl, imagename);
+    const imageUrl = 'https://server.jinhy.uk/api/static/' + imagename;
     const imageInstance = await this.imageModel.create({
       imageUrl,
       uploaderId: userId,

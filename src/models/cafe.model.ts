@@ -40,6 +40,9 @@ export class Cafe {
 
   @Prop()
   uploaderId: string;
+
+  @Prop()
+  tags: string[];
 }
 
 export const CafeSchema = SchemaFactory.createForClass(Cafe);
