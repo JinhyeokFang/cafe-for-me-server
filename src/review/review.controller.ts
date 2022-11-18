@@ -80,9 +80,10 @@ export class ReviewController {
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  public async deleteReview(@Param('id') id: string) {
+  public async deleteReview(@UserId() userId: string, @Param('id') id: string) {
     await this.reviewService.deleteReview({
       id,
+      userId,
     });
     return {
       success: true,

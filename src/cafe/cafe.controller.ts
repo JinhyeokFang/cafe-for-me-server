@@ -217,9 +217,13 @@ export class CafeController {
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  public async deleteCafe(@Param('id') id: string) {
+  public async deleteCafe(
+    @UserId() userId: string,
+    @Param('id') id: string
+  ) {
     await this.cafeService.deleteCafe({
       id,
+      userId,
     });
     return {
       success: true,
@@ -229,12 +233,14 @@ export class CafeController {
   @UseGuards(JwtGuard)
   @Delete(':id/image/:imageIndex')
   public async deleteCafeImage(
+    @UserId() userId: string,
     @Param('id') id: string,
     @Param('imageIndex', ParseIntPipe) imageIndex: number,
   ) {
     await this.cafeService.deleteCafeImage({
       id,
       imageIndex,
+      userId,
     });
     return {
       success: true,

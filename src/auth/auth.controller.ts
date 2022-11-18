@@ -1,5 +1,6 @@
-import { Body, ConflictException, Controller, HttpException, InternalServerErrorException, Logger, NotFoundException, Post } from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, HttpException, InternalServerErrorException, Logger, NotFoundException, Param, Post } from '@nestjs/common';
 import ServiceError from 'src/base/service-error';
+import { User } from 'src/models/user.model';
 import { AuthService, AuthServiceErrorCode } from './auth.service';
 import LoginRequestBody from './dtos/login-request.body';
 import RegisterRequestBody from './dtos/register-request.body';
@@ -72,5 +73,11 @@ export class AuthController {
         },
       );
     }
+  }
+
+  @Get('user/:userId')
+  public async getUser(@Param('userId') userId: string) {
+    const user: User = await this.authService.getUser(userId);
+    return user;
   }
 }

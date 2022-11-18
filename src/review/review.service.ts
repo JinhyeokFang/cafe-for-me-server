@@ -53,9 +53,10 @@ export class ReviewService {
   }
 
   public async deleteReview(deleteReviewDTO: DeleteReviewDTO) {
-    const { id } = deleteReviewDTO;
+    const { id, userId } = deleteReviewDTO;
     await this.reviewModel.deleteOne({
       _id: id,
+      uploaderId: userId,
     });
   }
 }

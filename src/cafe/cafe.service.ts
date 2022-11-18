@@ -217,7 +217,7 @@ export class CafeService {
   }
 
   public async deleteCafe(deleteCafeDTO: DeleteCafeDTO) {
-    const { id } = deleteCafeDTO;
+    const { id, userId } = deleteCafeDTO;
 
     const isExist = await this.isCafeExist(id);
     if (!isExist)
@@ -228,11 +228,12 @@ export class CafeService {
 
     await this.cafeModel.deleteOne({
       _id: id,
+      uploaderId: userId,
     });
   }
 
   public async deleteCafeImage(deleteCafeImageDTO: DeleteCafeImageDTO) {
-    const { id, imageIndex } = deleteCafeImageDTO;
+    const { id, imageIndex, userId } = deleteCafeImageDTO;
 
     const isExist = await this.isCafeImageExist(id, imageIndex);
     if (!isExist)
@@ -246,6 +247,7 @@ export class CafeService {
     await this.cafeModel.updateOne(
       {
         _id: id,
+        uploaderId: userId,
       },
       {
         $unset: setQuery,
@@ -254,6 +256,7 @@ export class CafeService {
     await this.cafeModel.updateOne(
       {
         _id: id,
+        uploaderId: userId,
       },
       {
         $pull: {

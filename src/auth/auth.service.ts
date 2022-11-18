@@ -89,4 +89,14 @@ export class AuthService {
     const hashedString = await bcrypt.hash(rawString, 10);
     return hashedString;
   }
+
+  public async getUser(userId: string): Promise<User> {
+    const user = await this.userModel.findOne({
+      _id: userId,
+    }, {
+      password: false,
+      name: false,
+    });
+    return user;
+  }
 }
