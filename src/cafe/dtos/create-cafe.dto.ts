@@ -10,4 +10,5 @@ export default interface CreateCafeDTO {
   closeDay: string;
   images: string[];
   uploaderId: string;
+  tags: string[];
 }

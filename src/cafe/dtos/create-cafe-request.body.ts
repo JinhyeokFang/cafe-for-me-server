@@ -31,4 +31,7 @@ export default class CreateCafeRequestBody {
 
   @IsString()
   closeDay: string;
+
+  @IsString()
+  tags: string;
 }

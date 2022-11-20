@@ -37,6 +37,7 @@ export class CafeService {
       closeDay,
       images,
       uploaderId,
+      tags,
     } = createCafeDTO;
 
     const location: GeoJson = {
@@ -55,6 +56,7 @@ export class CafeService {
       closeDay,
       images,
       uploaderId,
+      tags,
     });
 
     await cafeInstance.save();

@@ -44,7 +44,6 @@ export class LocationService {
         const url = '/v2/local/search/keyword.json';
         const parameters = {
             query: keyword,
-            category_group_code: 'CE7'
         };
         const responseData = await this.request(url, parameters);
         const locationData = responseData.documents;

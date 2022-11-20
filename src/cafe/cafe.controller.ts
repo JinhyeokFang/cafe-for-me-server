@@ -50,6 +50,7 @@ export class CafeController {
       closeHour,
       closeMinute,
       closeDay,
+      tags,
     } = createCafeRequestBody;
     let {
       latitude,
@@ -101,6 +102,7 @@ export class CafeController {
       closeDay,
       images: imageUrls,
       uploaderId: userId,
+      tags: tags.split(','),
     });
 
     return {
